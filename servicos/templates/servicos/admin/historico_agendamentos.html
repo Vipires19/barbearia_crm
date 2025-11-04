@@ -1,0 +1,125 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block title %}Histórico de Agendamentos - Admin Barbearia{% endblock %}
+
+{% block content %}
+<div class="admin-content-header">
+    <h1><i class="fas fa-history me-3"></i>Histórico de Agendamentos</h1>
+    <p>Consulte agendamentos por data e serviço</p>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtrar Agendamentos</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Data</label>
+                        <input type="date" class="form-control" name="data" value="{{ data_filtro }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Serviço (Opcional)</label>
+                        <select class="form-control" name="servico">
+                            <option value="">Todos os serviços</option>
+                            {% for servico in servicos %}
+                            <option value="{{ servico.id }}" {% if servico_filtro == servico.id|stringformat:"s" %}selected{% endif %}>
+                                {{ servico.nome }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Filtrar
+                            </button>
+                            <a href="{% url 'servicos:historico_agendamentos' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Agendamentos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Agendamentos - {{ data_filtro|date:"d/m/Y" }}</h5>
+            </div>
+            <div class="card-body">
+                {% if agendamentos %}
+                <div class="table-responsive">
+                    <table class="table" id="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Serviço</th>
+                                <th>Cliente</th>
+                                <th>Profissional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agendamento in agendamentos %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-info fs-6">{{ agendamento.data_agendamento|date:"d/m/Y" }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info fs-6">{{ agendamento.hora_agendamento }}</span>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary fs-6">{{ agendamento.servico.nome }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary fs-6">{{ agendamento.cliente_nome }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ agendamento.profissional.nome_completo }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x mb-3" style="color: var(--accent-blue);"></i>
+                    <h5>Nenhum agendamento encontrado</h5>
+                    <p class="text-muted">Nenhum agendamento encontrado para a data e serviço selecionados.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Configurar data padrão como hoje se não houver filtro
+document.addEventListener('DOMContentLoaded', function() {
+    const dataInput = document.querySelector('input[name="data"]');
+    if (!dataInput.value) {
+        const hoje = new Date().toISOString().split('T')[0];
+        dataInput.value = hoje;
+    }
+});
+</script>
+{% endblock %}
+
+

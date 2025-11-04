@@ -1,0 +1,268 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block title %}Criar Horários - {{ profissional.nome_completo }} - Admin Barbearia{% endblock %}
+
+{% block content %}
+<div class="admin-content-header">
+    <h1>
+        <i class="fas fa-plus me-3"></i>
+        Criar Horários - {{ profissional.nome_completo }}
+    </h1>
+    <p>Crie horários disponíveis para o profissional</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar me-2"></i>
+                    Configuração de Horários
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="criarHorariosForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Data *</label>
+                                <input type="date" class="form-control" name="data" required>
+                                <small class="text-muted">Selecione a data para criar os horários</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Intervalo (minutos) *</label>
+                                <select class="form-control" name="intervalo" required>
+                                    <option value="15">15 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">60 minutos</option>
+                                </select>
+                                <small class="text-muted">Intervalo entre cada horário</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Hora de Início *</label>
+                                <input type="time" class="form-control" name="hora_inicio" value="08:00" required>
+                                <small class="text-muted">Horário de início do expediente</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Hora de Fim *</label>
+                                <input type="time" class="form-control" name="hora_fim" value="18:00" required>
+                                <small class="text-muted">Horário de fim do expediente</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" name="observacoes" rows="3" 
+                                  placeholder="Observações sobre os horários criados..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'servicos:horarios_profissional' profissional.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Criar Horários
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Preview dos Horários -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-eye me-2"></i>Preview</h5>
+            </div>
+            <div class="card-body">
+                <div id="preview-horarios">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-clock fa-3x mb-3"></i>
+                        <p>Configure os horários para ver o preview</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dicas -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Dicas</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Use intervalos de 30 minutos para melhor organização
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Considere horários de almoço (12:00 - 13:00)
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Você pode ativar/desativar horários individualmente depois
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Horários podem ser criados para vários dias
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview dos horários em tempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('criarHorariosForm');
+    const previewDiv = document.getElementById('preview-horarios');
+    
+    // Função para gerar preview
+    function gerarPreview() {
+        const data = form.querySelector('input[name="data"]').value;
+        const horaInicio = form.querySelector('input[name="hora_inicio"]').value;
+        const horaFim = form.querySelector('input[name="hora_fim"]').value;
+        const intervalo = parseInt(form.querySelector('select[name="intervalo"]').value);
+        
+        if (!data || !horaInicio || !horaFim) {
+            previewDiv.innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-clock fa-3x mb-3"></i>
+                    <p>Configure os horários para ver o preview</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Calcular horários
+        const horarios = [];
+        const inicio = new Date(`2000-01-01T${horaInicio}`);
+        const fim = new Date(`2000-01-01T${horaFim}`);
+        
+        let horarioAtual = new Date(inicio);
+        
+        while (horarioAtual < fim) {
+            const proximoHorario = new Date(horarioAtual.getTime() + (intervalo * 60000));
+            
+            if (proximoHorario <= fim) {
+                const horaInicioStr = horarioAtual.toTimeString().substr(0, 5);
+                const horaFimStr = proximoHorario.toTimeString().substr(0, 5);
+                
+                horarios.push({
+                    inicio: horaInicioStr,
+                    fim: horaFimStr
+                });
+            }
+            
+            horarioAtual = proximoHorario;
+        }
+        
+        // Renderizar preview
+        let previewHTML = `
+            <div class="mb-3">
+                <h6 style="color: #f0f0f0;">Data: ${data}</h6>
+                <small class="text-muted">${horarios.length} horários serão criados</small>
+            </div>
+            <div class="row">
+        `;
+        
+        horarios.forEach((horario, index) => {
+            if (index < 8) { // Mostrar apenas os primeiros 8
+                previewHTML += `
+                    <div class="col-6 mb-2">
+                        <span class="badge bg-primary">${horario.inicio} - ${horario.fim}</span>
+                    </div>
+                `;
+            }
+        });
+        
+        previewHTML += '</div>';
+        
+        if (horarios.length > 8) {
+            previewHTML += `<small class="text-muted">... e mais ${horarios.length - 8} horários</small>`;
+        }
+        
+        previewDiv.innerHTML = previewHTML;
+    }
+    
+    // Event listeners
+    form.querySelector('input[name="data"]').addEventListener('change', gerarPreview);
+    form.querySelector('input[name="hora_inicio"]').addEventListener('change', gerarPreview);
+    form.querySelector('input[name="hora_fim"]').addEventListener('change', gerarPreview);
+    form.querySelector('select[name="intervalo"]').addEventListener('change', gerarPreview);
+    
+    // Submit do formulário
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        fetch('{% url "servicos:criar_horarios_diarios" profissional.id %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '{% url "servicos:horarios_profissional" profissional.id %}';
+                }, 2000);
+            } else {
+                showNotification('Erro: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            showNotification('Erro ao criar horários', 'error');
+        });
+    });
+});
+
+// Função para mostrar notificações
+function showNotification(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    
+    const notification = `
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="${icon} me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', notification);
+    
+    // Auto-hide após 5 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert:last-of-type');
+        if (alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

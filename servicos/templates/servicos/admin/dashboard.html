@@ -1,0 +1,229 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block title %}Dashboard - Admin Barbearia{% endblock %}
+
+{% block content %}
+<div class="admin-content-header">
+    <h1><i class="fas fa-chart-bar me-3"></i>Dashboard</h1>
+    <p>Visão geral da barbearia e estatísticas em tempo real</p>
+</div>
+
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_servicos }}</div>
+            <div class="stat-label">Serviços</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_profissionais }}</div>
+            <div class="stat-label">Profissionais</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_agendamentos }}</div>
+            <div class="stat-label">Agendamentos</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ agendamentos_pendentes }}</div>
+            <div class="stat-label">Pendentes</div>
+        </div>
+    </div>
+</div>
+
+<!-- Agendamentos por Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Agendamentos por Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="mb-2">
+                            <span class="badge badge-pendente fs-6">{{ agendamentos_pendentes }}</span>
+                        </div>
+                        <h6>Pendentes</h6>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-2">
+                            <span class="badge badge-confirmado fs-6">{{ agendamentos_confirmados }}</span>
+                        </div>
+                        <h6>Confirmados</h6>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-2">
+                            <span class="badge badge-concluido fs-6">{{ agendamentos_concluidos }}</span>
+                        </div>
+                        <h6>Concluídos</h6>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="mb-2">
+                            <span class="badge badge-cancelado fs-6">{{ agendamentos_cancelados }}</span>
+                        </div>
+                        <h6>Cancelados</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agendamentos Recentes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Agendamentos Recentes</h5>
+            </div>
+            <div class="card-body">
+                {% if agendamentos_recentes %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Serviço</th>
+                                <th>Profissional</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agendamento in agendamentos_recentes %}
+                            <tr>
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary fs-6">{{ agendamento.cliente_nome }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary fs-6">{{ agendamento.servico.nome }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ agendamento.profissional.nome_completo }}</span>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="badge bg-info fs-6">{{ agendamento.data_agendamento|date:"d/m/Y" }}</span>
+                                    </div>
+                                    <small class="service-info">{{ agendamento.hora_agendamento }}</small>
+                                </td>
+                                <td>
+                                    {% if agendamento.status == 'pendente' %}
+                                    <span class="badge badge-pendente">Pendente</span>
+                                    {% elif agendamento.status == 'confirmado' %}
+                                    <span class="badge badge-confirmado">Confirmado</span>
+                                    {% elif agendamento.status == 'em_andamento' %}
+                                    <span class="badge bg-warning">Em Andamento</span>
+                                    {% elif agendamento.status == 'concluido' %}
+                                    <span class="badge badge-confirmado">Concluído</span>
+                                    {% elif agendamento.status == 'cancelado' %}
+                                    <span class="badge badge-cancelado">Cancelado</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ agendamento.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-primary" 
+                                                onclick="atualizarStatus('{{ agendamento.id }}', 'confirmado')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-success" 
+                                                onclick="atualizarStatus('{{ agendamento.id }}', 'concluido')">
+                                            <i class="fas fa-flag-checkered"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" 
+                                                onclick="atualizarStatus('{{ agendamento.id }}', 'cancelado')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-times fa-3x mb-3" style="color: var(--accent-blue);"></i>
+                    <h5>Nenhum agendamento recente</h5>
+                    <p class="text-muted">Os agendamentos aparecerão aqui quando forem criados.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Atualizar status do agendamento
+function atualizarStatus(agendamentoId, novoStatus) {
+    const formData = new FormData();
+    formData.append('status', novoStatus);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`/agendamentos/${agendamentoId}/atualizar-status/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showNotification('Erro: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao atualizar status do agendamento', 'error');
+    });
+}
+
+// Função para mostrar notificações
+function showNotification(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    
+    const notification = `
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="${icon} me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', notification);
+    
+    // Auto-hide após 5 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert:last-of-type');
+        if (alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+
+// Auto-refresh a cada 30 segundos
+setInterval(() => {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}
