@@ -1,0 +1,193 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Barbearia - Início{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-cut"></i> Barbearia Premium
+                </h1>
+                <p class="lead mb-4">
+                    Agende seu horário com os melhores profissionais. 
+                    Cortes modernos, barbas perfeitas e atendimento de qualidade.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'servicos:lista_servicos' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-calendar-alt"></i> Agendar Agora
+                    </a>
+                    <a href="{% url 'servicos:lista_servicos' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-list"></i> Ver Serviços
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-cut" style="font-size: 15rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_servicos }}</div>
+                <div class="text-muted">Serviços</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_profissionais }}</div>
+                <div class="text-muted">Profissionais</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-number">4.9</div>
+                <div class="text-muted">
+                    <i class="fas fa-star rating-stars"></i> Avaliação
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="text-muted">Clientes Satisfeitos</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-5">
+                <i class="fas fa-star"></i> Nossos Serviços
+            </h2>
+        </div>
+    </div>
+    
+    {% if servicos_destaque %}
+        <div class="row">
+            {% for servico in servicos_destaque %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card service-card h-100">
+                        {% if servico.imagem %}
+                            <img src="/media/{{ servico.imagem }}" class="card-img-top" alt="{{ servico.nome }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-cut fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <i class="fas fa-{{ servico.categoria.nome|lower }}"></i> {{ servico.nome }}
+                            </h5>
+                            <p class="card-text text-muted">{{ servico.descricao|truncatewords:15 }}</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h4 text-primary mb-0">R$ {{ servico.preco }}</span>
+                                    <span class="badge bg-secondary">{{ servico.get_duracao_display }}</span>
+                                </div>
+                                <a href="{% url 'servicos:agendar_servico' %}?servico_id={{ servico.id }}" class="btn btn-primary w-100">
+                                    <i class="fas fa-calendar-alt"></i> Agendar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'servicos:lista_servicos' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-list"></i> Ver Todos os Serviços
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Nenhum serviço disponível no momento.
+            </div>
+        </div>
+    {% endif %}
+</section>
+
+<!-- Professionals Section -->
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-5">
+                <i class="fas fa-users"></i> Nossos Profissionais
+            </h2>
+        </div>
+    </div>
+    
+    {% if profissionais %}
+        <div class="row">
+            {% for profissional in profissionais %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card professional-card h-100">
+                        <div class="card-body">
+                            {% if profissional.foto %}
+                                <img src="/media/{{ profissional.foto }}" alt="{{ profissional.nome_completo }}" class="professional-photo">
+                            {% else %}
+                                <div class="professional-photo bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <h5 class="card-title">{{ profissional.nome_completo }}</h5>
+                            <p class="text-muted">{{ profissional.experiencia_anos }} anos de experiência</p>
+                            
+                            <div class="rating mb-3">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= profissional.avaliacao_media %}
+                                        <i class="fas fa-star rating-stars"></i>
+                                    {% else %}
+                                        <i class="far fa-star rating-stars"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2 text-muted">({{ profissional.total_avaliacoes }})</span>
+                            </div>
+                            
+                            {% if profissional.bio %}
+                                <p class="card-text small text-muted">{{ profissional.bio|truncatewords:20 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'servicos:lista_profissionais' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-users"></i> Ver Todos os Profissionais
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Nenhum profissional cadastrado no momento.
+            </div>
+        </div>
+    {% endif %}
+</section>
+
+<!-- CTA Section -->
+<section class="bg-light py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Pronto para um Visual Novo?</h2>
+        <p class="lead mb-4">Agende seu horário agora e garante seu look perfeito!</p>
+        <a href="{% url 'servicos:lista_servicos' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-calendar-alt"></i> Agendar Agora
+        </a>
+    </div>
+</section>
+{% endblock %}
+

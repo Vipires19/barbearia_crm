@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ servico.nome }} - Barbearia Premium{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb" style="background: var(--secondary-black); border-radius: 10px; padding: 15px;">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'servicos:lista_servicos' %}" style="color: var(--accent-blue); text-decoration: none;">
+                        <i class="fas fa-home me-1"></i>Serviços
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" style="color: var(--gold-accent);">
+                    {{ servico.nome }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Imagem do Serviço -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            {% if servico.imagem %}
+            <img src="/media/{{ servico.imagem }}" class="card-img-top" alt="{{ servico.nome }}" 
+                 style="height: 400px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top d-flex align-items-center justify-content-center" 
+                 style="height: 400px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-red));">
+                <i class="fas fa-cut fa-5x" style="color: var(--pure-white);"></i>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Informações do Serviço -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h3 class="mb-0" style="color: var(--gold-accent); font-family: 'Playfair Display', serif;">
+                    {{ servico.nome }}
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <span class="badge bg-primary fs-6">{{ servico.categoria }}</span>
+                </div>
+                
+                <div class="mb-4">
+                    <h5 style="color: var(--gold-accent);">Descrição</h5>
+                    <p class="text-light">{{ servico.descricao|default:"Descrição não disponível." }}</p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6 style="color: var(--accent-blue);">Preço</h6>
+                            <h3 style="color: var(--gold-accent);">R$ {{ servico.preco|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6 style="color: var(--accent-blue);">Duração</h6>
+                            <h3 style="color: var(--gold-accent);">{{ servico.duracao_minutos }} min</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if servico.profissionais_habilitados %}
+                <div class="mb-4">
+                    <h5 style="color: var(--gold-accent);">Profissionais Disponíveis</h5>
+                    <div class="row">
+                        {% for profissional in servico.profissionais_habilitados %}
+                        <div class="col-12 mb-2">
+                            <div class="d-flex align-items-center p-2" style="background: var(--primary-black); border-radius: 8px;">
+                                {% if profissional.foto %}
+                                <img src="/media/{{ profissional.foto }}" class="rounded-circle me-3" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px; background: var(--accent-blue);">
+                                    <i class="fas fa-user" style="color: var(--pure-white);"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0">{{ profissional.nome_completo }}</h6>
+                                    {% if profissional.especialidades %}
+                                    <small class="text-muted">
+                                        {% for espec in profissional.especialidades %}
+                                            {{ espec }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'servicos:agendar_servico' %}?servico_id={{ servico.id }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-calendar-plus me-2"></i>Agendar Este Serviço
+                    </a>
+                    <a href="{% url 'servicos:lista_servicos' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar aos Serviços
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações Adicionais -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" style="color: var(--gold-accent);">
+                    <i class="fas fa-info-circle me-2"></i>Informações Importantes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-clock fa-2x mb-2" style="color: var(--accent-blue);"></i>
+                            <h6>Horário de Funcionamento</h6>
+                            <p class="text-muted">Segunda a Sexta: 8h às 18h<br>Sábado: 8h às 16h</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-calendar-check fa-2x mb-2" style="color: var(--accent-red);"></i>
+                            <h6>Agendamento</h6>
+                            <p class="text-muted">Agende com antecedência para garantir sua vaga</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-phone fa-2x mb-2" style="color: var(--gold-accent);"></i>
+                            <h6>Contato</h6>
+                            <p class="text-muted">(11) 99999-9999<br>contato@barbeariapremium.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
