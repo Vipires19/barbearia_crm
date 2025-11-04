@@ -1,0 +1,55 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tags me-2"></i>Categorias de Roupas</h2>
+    <a href="{% url 'servicos:categoria_nova' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Nova Categoria
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Crie categorias para organizar seus produtos. Ex: Camisetas, Calças, Bonés, etc.
+        </div>
+        
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categorias %}
+                <tr>
+                    <td><strong style="color: #ffd700;">{{ cat.nome }}</strong></td>
+                    <td style="color: #ccc;">{{ cat.descricao|truncatewords:10|default:"Sem descrição" }}</td>
+                    <td>
+                        <span class="badge bg-{% if cat.ativo %}success{% else %}secondary{% endif %}">
+                            {% if cat.ativo %}Ativo{% else %}Inativo{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'servicos:categoria_editar' pk=cat.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <p style="color: #ccc;">Nenhuma categoria cadastrada. Crie a primeira!</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

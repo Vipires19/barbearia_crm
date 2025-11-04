@@ -1,0 +1,151 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tshirt me-2"></i>{% if produto %}Editar{% else %}Novo{% endif %} Produto</h2>
+    <a href="{% url 'servicos:produtos_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label" style="color: #ffd700;">Nome do Produto *</label>
+                        <input type="text" class="form-control" id="nome" name="nome" 
+                               value="{{ produto.nome }}" required style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="categoria" class="form-label" style="color: #ffd700;">Categoria *</label>
+                        <select class="form-control" id="categoria" name="categoria" required style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                            <option value="">Selecione uma categoria</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.id }}" {% if produto.categoria.id == cat.id %}selected{% endif %}>
+                                {{ cat.nome }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="preco" class="form-label" style="color: #ffd700;">Preço de Venda *</label>
+                                <input type="number" step="0.01" class="form-control" id="preco" 
+                                       name="preco" value="{{ produto.preco }}" required style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="preco_custo" class="form-label" style="color: #ffd700;">Preço de Custo</label>
+                                <input type="number" step="0.01" class="form-control" id="preco_custo" 
+                                       name="preco_custo" value="{{ produto.preco_custo }}" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="marca" class="form-label" style="color: #ffd700;">Marca</label>
+                            <input type="text" class="form-control" id="marca" name="marca" value="{{ produto.marca }}" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cor" class="form-label" style="color: #ffd700;">Cor</label>
+                            <input type="text" class="form-control" id="cor" name="cor" value="{{ produto.cor }}" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="material" class="form-label" style="color: #ffd700;">Material</label>
+                            <input type="text" class="form-control" id="material" name="material" value="{{ produto.material }}" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="imagem" class="form-label" style="color: #ffd700;">Imagem do Produto</label>
+                        <input type="file" class="form-control" id="imagem" name="imagem" accept="image/*" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        {% if produto.imagem %}
+                        <small class="text-muted">Imagem atual: {{ produto.imagem }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="estoque_minimo" class="form-label" style="color: #ffd700;">Estoque Mínimo</label>
+                        <input type="number" class="form-control" id="estoque_minimo" 
+                               name="estoque_minimo" value="{{ produto.estoque_minimo }}" required style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="ativo" name="ativo" 
+                               {% if not produto or produto.ativo %}checked{% endif %}>
+                        <label class="form-check-label" for="ativo" style="color: #ffd700;">
+                            Produto Ativo
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="em_destaque" name="em_destaque" 
+                               {% if produto.em_destaque %}checked{% endif %}>
+                        <label class="form-check-label" for="em_destaque" style="color: #ffd700;">
+                            Em Destaque
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="mt-4 mb-3" style="color: #ffd700;">Estoque por Tamanho</h4>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estoque_pp" class="form-label" style="color: #ffd700;">PP</label>
+                        <input type="number" class="form-control" id="estoque_pp" 
+                               name="estoque_pp" value="{{ produto.estoque_pp }}" min="0" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estoque_p" class="form-label" style="color: #ffd700;">P</label>
+                        <input type="number" class="form-control" id="estoque_p" 
+                               name="estoque_p" value="{{ produto.estoque_p }}" min="0" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estoque_m" class="form-label" style="color: #ffd700;">M</label>
+                        <input type="number" class="form-control" id="estoque_m" 
+                               name="estoque_m" value="{{ produto.estoque_m }}" min="0" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estoque_g" class="form-label" style="color: #ffd700;">G</label>
+                        <input type="number" class="form-control" id="estoque_g" 
+                               name="estoque_g" value="{{ produto.estoque_g }}" min="0" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estoque_gg" class="form-label" style="color: #ffd700;">GG</label>
+                        <input type="number" class="form-control" id="estoque_gg" 
+                               name="estoque_gg" value="{{ produto.estoque_gg }}" min="0" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <a href="{% url 'servicos:produtos_lista' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Salvar Produto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

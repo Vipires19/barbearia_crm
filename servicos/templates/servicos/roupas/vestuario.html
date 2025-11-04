@@ -1,0 +1,1273 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block extra_css %}
+<style>
+    /* Corrigir texto branco em linhas com fundo amarelo */
+    .table-warning,
+    .table-warning td,
+    .table-warning th {
+        color: #000 !important;
+        background-color: #ffc107 !important;
+    }
+    
+    .table-warning strong {
+        color: #000 !important;
+    }
+    
+    /* Garantir legibilidade nas badges e textos de estoque baixo */
+    .table-warning .badge,
+    .table-warning .badge.text-dark,
+    .table-warning span.badge,
+    .table-warning small.text-danger {
+        color: #000 !important;
+        background-color: #ffc107 !important;
+        border: 1px solid #000 !important;
+    }
+    
+    /* Mensagem de estoque baixo sempre visível */
+    .table-warning small.text-danger {
+        color: #dc3545 !important;
+        background-color: transparent !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    
+    /* Animações para mensagens */
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+    
+    /* Melhorar contraste nas linhas */
+    #listaProdutos tr {
+        transition: background-color 0.2s;
+    }
+    
+    #listaProdutos tr:hover {
+        background-color: rgba(0, 102, 204, 0.1) !important;
+    }
+    
+    /* Garantir que os botões sejam clicáveis */
+    .btn-sm {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .btn-sm:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estilo para tabelas - fundo cinza escuro com textos destacados */
+    .table {
+        background-color: #2d2d2d !important;
+        color: #e0e0e0 !important;
+    }
+    
+    .table thead {
+        background-color: #1a1a1a !important;
+        color: #ffd700 !important;
+    }
+    
+    .table thead th {
+        background-color: #1a1a1a !important;
+        color: #ffd700 !important;
+        border-color: #0066cc !important;
+        font-weight: 600;
+        padding: 12px;
+    }
+    
+    .table tbody {
+        background-color: #2d2d2d !important;
+    }
+    
+    .table tbody td {
+        background-color: #2d2d2d !important;
+        color: #e0e0e0 !important;
+        border-color: #404040 !important;
+        padding: 12px;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr {
+        background-color: #2d2d2d !important;
+        border-bottom: 1px solid #404040 !important;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #353535 !important;
+    }
+    
+    /* Badges destacados para todos os textos importantes */
+    .table .badge {
+        padding: 6px 12px !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        border-radius: 20px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Produto nome em badge */
+    .table tbody td .fw-bold {
+        display: inline-block;
+        background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+        color: #ffffff !important;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0, 102, 204, 0.4);
+        margin-bottom: 5px;
+    }
+    
+    /* Preço destacado */
+    .table .badge.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+        color: #ffffff !important;
+        padding: 8px 14px !important;
+        font-size: 1rem !important;
+    }
+    
+    /* Estoque baixo - manter amarelo mas com texto destacado */
+    .table-warning {
+        background-color: #ffc107 !important;
+    }
+    
+    .table-warning td {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+    
+    .table-warning .badge {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .table-warning .fw-bold {
+        background: #000 !important;
+        color: #ffc107 !important;
+    }
+    
+    /* Tabela do carrinho */
+    #carrinhoVenda .table {
+        background-color: #2d2d2d !important;
+    }
+    
+    #carrinhoVenda .table thead th {
+        background-color: #1a1a1a !important;
+        color: #ffd700 !important;
+        border-color: #0066cc !important;
+        font-weight: 600;
+    }
+    
+    #carrinhoVenda .table tbody td {
+        background-color: #2d2d2d !important;
+        color: #e0e0e0 !important;
+        border-color: #404040 !important;
+    }
+    
+    #carrinhoVenda .table tbody tr strong {
+        background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+        color: #ffffff !important;
+        padding: 5px 12px;
+        border-radius: 15px;
+        display: inline-block;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 102, 204, 0.3);
+    }
+    
+    #carrinhoVenda .table tbody td small.text-muted {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffd700 !important;
+        padding: 3px 8px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-top: 5px;
+    }
+    
+    #carrinhoVenda .table tbody td .text-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        color: #ffffff !important;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    }
+    
+    /* Card body com fundo escuro */
+    .card-body {
+        background-color: #1a1a1a !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tshirt me-2"></i>Vestuário</h2>
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adicionarProdutoModal">
+            <i class="fas fa-plus me-1"></i>Adicionar Produto
+        </button>
+    </div>
+</div>
+
+<!-- Produtos em Estoque -->
+<div class="card mb-4">
+    <div class="card-header" style="background: linear-gradient(135deg, #0066cc 0%, #ff0000 100%); color: white;">
+        <h5 class="mb-0">
+            <i class="fas fa-boxes me-2"></i>Estoque de Produtos
+            <span class="badge bg-light text-dark ms-2">{{ produtos|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if produtos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>
+                            <i class="fas fa-cube me-1" data-bs-toggle="tooltip" title="Produto"></i>Produto
+                        </th>
+                        <th>
+                            <i class="fas fa-tags me-1" data-bs-toggle="tooltip" title="Categoria do produto"></i>Categoria
+                        </th>
+                        <th>
+                            <i class="fas fa-ruler me-1" data-bs-toggle="tooltip" title="Estoque Extra Pequeno"></i>PP
+                        </th>
+                        <th>
+                            <i class="fas fa-ruler me-1" data-bs-toggle="tooltip" title="Estoque Pequeno"></i>P
+                        </th>
+                        <th>
+                            <i class="fas fa-ruler me-1" data-bs-toggle="tooltip" title="Estoque Médio"></i>M
+                        </th>
+                        <th>
+                            <i class="fas fa-ruler me-1" data-bs-toggle="tooltip" title="Estoque Grande"></i>G
+                        </th>
+                        <th>
+                            <i class="fas fa-ruler me-1" data-bs-toggle="tooltip" title="Estoque Extra Grande"></i>GG
+                        </th>
+                        <th>
+                            <i class="fas fa-boxes me-1" data-bs-toggle="tooltip" title="Total de unidades em estoque"></i>Total
+                        </th>
+                        <th>
+                            <i class="fas fa-dollar-sign me-1" data-bs-toggle="tooltip" title="Preço de venda do produto"></i>Preço
+                        </th>
+                        <th class="text-center">
+                            <i class="fas fa-tasks me-1" data-bs-toggle="tooltip" title="Ações disponíveis"></i>Ações
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="listaProdutos">
+                    {% for produto in produtos %}
+                    <tr data-produto-id="{{ produto.id }}" class="{% if produto.estoque_baixo %}table-warning{% endif %}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center rounded-circle" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-tshirt text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold produto-nome-badge">
+                                        {{ produto.nome }}
+                                    </div>
+                                    {% if produto.estoque_baixo %}
+                                    <small class="text-danger" style="font-weight: bold; background-color: rgba(220, 53, 69, 0.2); padding: 2px 6px; border-radius: 4px;">
+                                        <i class="fas fa-exclamation-triangle"></i> Estoque baixo!
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary {% if produto.estoque_baixo %}text-dark{% endif %}">
+                                {{ produto.categoria|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="{% if produto.estoque_baixo %}text-dark{% endif %}">
+                            <span class="badge bg-info {% if produto.estoque_baixo %}text-dark{% endif %}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="PP: Extra Pequeno">
+                                {{ produto.estoque_pp|default:0 }}
+                            </span>
+                        </td>
+                        <td class="{% if produto.estoque_baixo %}text-dark{% endif %}">
+                            <span class="badge bg-info {% if produto.estoque_baixo %}text-dark{% endif %}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="P: Pequeno">
+                                {{ produto.estoque_p|default:0 }}
+                            </span>
+                        </td>
+                        <td class="{% if produto.estoque_baixo %}text-dark{% endif %}">
+                            <span class="badge bg-success {% if produto.estoque_baixo %}text-dark{% endif %}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="M: Médio">
+                                {{ produto.estoque_m|default:0 }}
+                            </span>
+                        </td>
+                        <td class="{% if produto.estoque_baixo %}text-dark{% endif %}">
+                            <span class="badge bg-warning {% if produto.estoque_baixo %}text-dark{% endif %}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="G: Grande">
+                                {{ produto.estoque_g|default:0 }}
+                            </span>
+                        </td>
+                        <td class="{% if produto.estoque_baixo %}text-dark{% endif %}">
+                            <span class="badge bg-danger {% if produto.estoque_baixo %}text-dark{% endif %}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="GG: Extra Grande">
+                                {{ produto.estoque_gg|default:0 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge fs-6 {% if produto.estoque_total > 10 %}bg-success{% elif produto.estoque_total > 0 %}bg-warning{% else %}bg-danger{% endif %} {% if produto.estoque_baixo %}text-dark{% endif %}">
+                                {{ produto.estoque_total|default:0 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-dollar-sign me-1"></i>
+                                R$ {{ produto.preco|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary" 
+                                    onclick="adicionarAoPedido('{{ produto.id }}', '{{ produto.nome|escapejs }}', {% if produto.preco %}{{ produto.preco }}{% else %}0{% endif %})" 
+                                    type="button"
+                                    data-bs-toggle="tooltip" 
+                                    title="Adicionar produto ao pedido">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x mb-3" style="color: #0066cc;"></i>
+                            <div style="color: #ccc;">
+                            Nenhum produto cadastrado. Clique em "Adicionar Produto" para começar.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-4x mb-3" style="color: #0066cc;"></i>
+            <h5>Nenhum produto cadastrado</h5>
+            <p class="text-muted">Comece criando seu primeiro produto de vestuário.</p>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adicionarProdutoModal">
+                <i class="fas fa-plus me-2"></i>Adicionar Primeiro Produto
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Formulário de Venda -->
+<div class="card">
+    <div class="card-header" style="background: linear-gradient(135deg, #0066cc 0%, #ff0000 100%); color: white;">
+        <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Registrar Venda</h5>
+    </div>
+    <div class="card-body">
+        {% if not produtos %}
+        <div class="alert alert-warning" role="alert">
+            <h5 class="alert-heading">
+                <i class="fas fa-exclamation-triangle me-2"></i>Nenhum produto cadastrado!
+            </h5>
+            <p>Para realizar vendas, você precisa cadastrar produtos primeiro.</p>
+            <hr>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adicionarProdutoModal">
+                <i class="fas fa-plus me-2"></i>Adicionar Primeiro Produto
+            </button>
+        </div>
+        {% else %}
+        <form method="POST" id="formVenda">
+            {% csrf_token %}
+            
+            <!-- Seleção de Produto -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label" style="color: #ffd700;">Categoria</label>
+                    <select class="form-control" id="selectCategoria" 
+                            style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        <option value="">Selecione a categoria</option>
+                        {% if produtos %}
+                        {% for produto in produtos %}
+                            {% ifchanged produto.categoria %}
+                            {% if produto.categoria %}
+                            <option value="{{ produto.categoria }}">{{ produto.categoria }}</option>
+                            {% endif %}
+                            {% endifchanged %}
+                        {% endfor %}
+                        {% else %}
+                        <option disabled>❌ Nenhum produto cadastrado. Adicione produtos primeiro!</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" style="color: #ffd700;">Produto</label>
+                    <select class="form-control" id="selectProduto" 
+                            style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        <option value="">Selecione o produto</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" style="color: #ffd700;">Tamanho</label>
+                    <select class="form-control" id="selectTamanho" 
+                            style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        <option value="">Selecione o tamanho</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <button type="button" class="btn btn-primary btn-lg" id="btnAdicionar">
+                        <i class="fas fa-plus me-2"></i>Adicionar ao Pedido
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Itens do Pedido -->
+            <div class="mb-4">
+                <h6 style="color: #ffd700;">Itens do Pedido</h6>
+                <div id="carrinhoVenda" style="min-height: 100px; border: 1px solid #0066cc; border-radius: 8px; padding: 15px; background: #1a1a1a;">
+                    <p style="color: #ccc;" id="carrinhoVazio">Nenhum item adicionado</p>
+                </div>
+            </div>
+            
+            <!-- Dados do Cliente e Venda -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cliente_nome" class="form-label" style="color: #ffd700;">Nome do Cliente *</label>
+                    <input type="text" class="form-control" id="cliente_nome" name="cliente_nome" 
+                           required style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="cliente_telefone" class="form-label" style="color: #ffd700;">Telefone</label>
+                    <input type="text" class="form-control" id="cliente_telefone" name="cliente_telefone" 
+                           style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                </div>
+            </div>
+            
+            <!-- Informações de Pagamento -->
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: #ffd700;">Valor do Pedido</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: #0066cc; color: #fff;">R$</span>
+                        <input type="number" step="0.01" class="form-control" id="valor_total" name="valor_total" 
+                               readonly style="background: #2d2d2d; color: #0066cc; font-weight: bold; font-size: 1.2rem;">
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: #ffd700;">Valor Desconto</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: #dc3545; color: #fff;">R$</span>
+                        <input type="number" step="0.01" class="form-control" id="valor_desconto" name="valor_desconto" 
+                               value="0" onchange="calcularValores()" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: #ffd700;">Valor Pago *</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: #28a745; color: #fff;">R$</span>
+                        <input type="number" step="0.01" class="form-control" id="valor_pago" name="valor_pago" 
+                               required onchange="calcularTroco()" style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: #ffd700;">Troco</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: #00cc66; color: #fff;">R$</span>
+                        <input type="text" class="form-control" id="troco" readonly 
+                               style="background: #2d2d2d; color: #00cc66; font-weight: bold; font-size: 1.1rem;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <label for="forma_pagamento" class="form-label" style="color: #ffd700;">Forma de Pagamento *</label>
+                    <select class="form-control" id="forma_pagamento" name="forma_pagamento" required 
+                            style="background: #2d2d2d; color: #fff; border-color: #0066cc;">
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="debito">Cartão Débito</option>
+                        <option value="credito">Cartão Crédito</option>
+                        <option value="pix">PIX</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Campo oculto para enviar itens -->
+            <input type="hidden" id="itens_json" name="itens">
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary" onclick="limparCarrinho()">
+                    <i class="fas fa-times"></i> Limpar Pedido
+                </button>
+                <button type="submit" class="btn btn-success btn-lg" id="btnConfirmarVenda">
+                    <i class="fas fa-check-circle me-2"></i>Confirmar Venda
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Adicionar Produto -->
+<div class="modal fade" id="adicionarProdutoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background: #2d2d2d; border-color: #0066cc;">
+            <div class="modal-header" style="border-bottom: 2px solid #0066cc;">
+                <h5 class="modal-title" style="color: #ffd700;">
+                    <i class="fas fa-plus me-2"></i>Adicionar Produto
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'servicos:produto_vestuario_adicionar' %}" enctype="multipart/form-data" id="formProduto">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="nome" class="form-label" style="color: #ffd700;">Nome do Produto *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required 
+                                       style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="categoria" class="form-label" style="color: #ffd700;">Categoria</label>
+                                <input type="text" class="form-control" id="categoria" name="categoria" 
+                                       placeholder="Ex: Camiseta, Boné, Short" style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="preco" class="form-label" style="color: #ffd700;">Preço de Venda *</label>
+                                        <input type="number" step="0.01" class="form-control" id="preco" name="preco" required 
+                                               style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="preco_custo" class="form-label" style="color: #ffd700;">Preço de Custo</label>
+                                        <input type="number" step="0.01" class="form-control" id="preco_custo" name="preco_custo" 
+                                               style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label" style="color: #ffd700;">Marca</label>
+                            <input type="text" class="form-control" name="marca" value=""
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" style="color: #ffd700;">Cor</label>
+                            <input type="text" class="form-control" name="cor" value=""
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" style="color: #ffd700;">Material</label>
+                            <input type="text" class="form-control" name="material" value=""
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-3" style="color: #ffd700;">Estoque por Tamanho</h6>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label class="form-label" style="color: #ffd700;" data-bs-toggle="tooltip" title="Estoque de tamanho PP (Extra Pequeno)">
+                                PP
+                            </label>
+                            <input type="number" class="form-control" name="estoque_pp" min="0" value="0"
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label" style="color: #ffd700;" data-bs-toggle="tooltip" title="Estoque de tamanho P (Pequeno)">
+                                P
+                            </label>
+                            <input type="number" class="form-control" name="estoque_p" min="0" value="0"
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label" style="color: #ffd700;" data-bs-toggle="tooltip" title="Estoque de tamanho M (Médio)">
+                                M
+                            </label>
+                            <input type="number" class="form-control" name="estoque_m" min="0" value="0"
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label" style="color: #ffd700;" data-bs-toggle="tooltip" title="Estoque de tamanho G (Grande)">
+                                G
+                            </label>
+                            <input type="number" class="form-control" name="estoque_g" min="0" value="0"
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label" style="color: #ffd700;" data-bs-toggle="tooltip" title="Estoque de tamanho GG (Extra Grande)">
+                                GG
+                            </label>
+                            <input type="number" class="form-control" name="estoque_gg" min="0" value="0"
+                                   style="background: #1a1a1a; color: #fff; border-color: #0066cc;">
+                        </div>
+                    </div>
+                </form>
+                
+                <script>
+                // Definir mostrarMensagem se ainda não estiver definida (para garantir disponibilidade no modal)
+                // Usar window para garantir que seja global
+                if (typeof window.mostrarMensagem === 'undefined') {
+                    window.mostrarMensagem = function(mensagem, tipo) {
+                        // Criar elemento de mensagem temporária
+                        const toast = document.createElement('div');
+                        toast.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: ${tipo === 'success' ? '#28a745' : '#dc3545'};
+                            color: white;
+                            padding: 15px 20px;
+                            border-radius: 5px;
+                            z-index: 9999;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                            animation: slideIn 0.3s ease;
+                        `;
+                        toast.textContent = mensagem;
+                        document.body.appendChild(toast);
+                        
+                        // Remover após 2 segundos
+                        setTimeout(() => {
+                            toast.style.animation = 'slideOut 0.3s ease';
+                            setTimeout(() => {
+                                if (document.body.contains(toast)) {
+                                    document.body.removeChild(toast);
+                                }
+                            }, 300);
+                        }, 2000);
+                    };
+                }
+                
+                // Prevenir submit padrão do formulário
+                document.getElementById('formProduto').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                // Salvar produto via AJAX quando modal for totalmente carregado
+                document.addEventListener('DOMContentLoaded', function() {
+                    const btnSalvar = document.getElementById('btnSalvarProduto');
+                    if (btnSalvar) {
+                        btnSalvar.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const form = document.getElementById('formProduto');
+                            const formData = new FormData(form);
+                            
+                            // Verificar se o formulário é válido
+                            if (!form.checkValidity()) {
+                                form.reportValidity();
+                                return;
+                            }
+                            
+                            // Verificar se pelo menos nome e preço foram preenchidos
+                            if (!formData.get('nome') || !formData.get('preco')) {
+                                alert('⚠️ Preencha pelo menos o nome e o preço do produto!');
+                                return;
+                            }
+                            
+                            // Desabilitar botão enquanto processa
+                            const btnOriginal = this.innerHTML;
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                            
+                            // Obter CSRF token
+                            const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+                            
+                            fetch('{% url "servicos:produto_vestuario_adicionar" %}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': csrfToken,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => {
+                                console.log('📡 Resposta recebida:', response.status);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('📦 Dados recebidos:', data);
+                                if (data.success) {
+                                    // Mostrar mensagem de sucesso
+                                    mostrarMensagem('✅ Produto adicionado com sucesso!', 'success');
+                                    
+                                    // Fechar modal
+                                    const modalEl = document.getElementById('adicionarProdutoModal');
+                                    const modal = bootstrap.Modal.getInstance(modalEl);
+                                    if (modal) {
+                                        modal.hide();
+                                    }
+                                    
+                                    // Recarregar página para mostrar novo produto
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1000);
+                                } else {
+                                    alert('❌ Erro: ' + (data.error || 'Erro desconhecido'));
+                                    // Reabilitar botão
+                                    this.disabled = false;
+                                    this.innerHTML = btnOriginal;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Erro:', error);
+                                alert('❌ Erro ao adicionar produto. Verifique o console para mais detalhes.');
+                                // Reabilitar botão
+                                this.disabled = false;
+                                this.innerHTML = btnOriginal;
+                            });
+                        });
+                    }
+                });
+                </script>
+            </div>
+            <div class="modal-footer" style="border-top: 2px solid #0066cc;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarProduto">
+                    <i class="fas fa-save"></i> Salvar Produto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Definir funções globais primeiro para garantir que estejam disponíveis em qualquer lugar
+// Usar window para garantir que seja global e sobrescrever qualquer definição anterior
+window.mostrarMensagem = function(mensagem, tipo) {
+    // Criar elemento de mensagem temporária
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${tipo === 'success' ? '#28a745' : '#dc3545'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+    `;
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+    
+    // Remover após 2 segundos
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 2000);
+};
+
+let carrinho = [];
+let produtosPorCategoria = {};
+let produtosDados = {};
+
+// Função para adicionar produto diretamente da tabela ao pedido
+function adicionarAoPedido(produtoId, produtoNome, produtoPreco) {
+    console.log('🎯 Adicionando produto ao pedido:', { produtoId, produtoNome, produtoPreco });
+    
+    if (!produtoId) {
+        mostrarMensagem('⚠️ Erro: ID do produto não encontrado!', 'error');
+        return;
+    }
+    
+    // Buscar dados completos do produto
+    const produto = produtosDados[produtoId] || produtosDados[produtoId.toString()];
+    
+    if (!produto) {
+        console.error('❌ Produto não encontrado nos dados:', produtoId);
+        mostrarMensagem('⚠️ Erro: Dados do produto não encontrados!', 'error');
+        return;
+    }
+    
+    // Verificar se há estoque disponível
+    const estoqueTotal = produto.estoque_pp + produto.estoque_p + produto.estoque_m + 
+                         produto.estoque_g + produto.estoque_gg;
+    
+    if (estoqueTotal === 0) {
+        mostrarMensagem('⚠️ Produto sem estoque disponível!', 'error');
+        return;
+    }
+    
+    // Abrir modal ou diretamente adicionar com tamanho "Único" se não tiver tamanhos específicos
+    // Por enquanto, vamos adicionar diretamente com tamanho "unico"
+    const categoria = produto.categoria || 'Sem Categoria';
+    const tamanho = 'unico'; // Tamanho padrão quando adicionado direto da tabela
+    
+    carrinho.push({
+        produto_id: produtoId.toString(),
+        produto_nome: produtoNome || produto.nome,
+        categoria: categoria,
+        tamanho: tamanho,
+        preco: produtoPreco || produto.preco,
+        quantidade: 1
+    });
+    
+    atualizarCarrinho();
+    atualizarValorTotal();
+    mostrarMensagem('✅ Produto adicionado ao pedido!', 'success');
+    
+    console.log('✅ Produto adicionado com sucesso! Carrinho agora tem:', carrinho.length, 'itens');
+}
+
+// Organizar produtos por categoria - usando JSON seguro do backend
+try {
+    var produtosList = {{ produtos_json|safe }};
+    
+    produtosList.forEach(function(produto) {
+        if (produto.categoria) {
+            var categoriaKey = produto.categoria || 'Sem Categoria';
+            var produtoId = String(produto.id);
+            
+            produtosDados[produtoId] = {
+                id: produtoId,
+                nome: produto.nome,
+                categoria: produto.categoria,
+                preco: produto.preco || 0,
+                estoque_pp: produto.estoque_pp || 0,
+                estoque_p: produto.estoque_p || 0,
+                estoque_m: produto.estoque_m || 0,
+                estoque_g: produto.estoque_g || 0,
+                estoque_gg: produto.estoque_gg || 0
+            };
+
+            // Organizar por categoria
+            if (!produtosPorCategoria[categoriaKey]) {
+                produtosPorCategoria[categoriaKey] = [];
+            }
+            produtosPorCategoria[categoriaKey].push({
+                id: produtoId,
+                nome: produto.nome,
+                preco: produto.preco || 0
+            });
+        }
+    });
+} catch(e) {
+    console.error('Erro ao processar produtos:', e);
+}
+
+// Garantir que todos os IDs sejam strings
+Object.keys(produtosDados).forEach(key => {
+    if (produtosDados[key] && produtosDados[key].id) {
+        produtosDados[key].id = String(produtosDados[key].id);
+    }
+});
+
+console.log('📦 Produtos organizados:', produtosPorCategoria);
+console.log('📦 Total de categorias:', Object.keys(produtosPorCategoria).length);
+console.log('📦 Categorias disponíveis:', Object.keys(produtosPorCategoria));
+
+// Quando seleciona categoria, atualiza lista de produtos
+document.getElementById('selectCategoria').addEventListener('change', function() {
+    const categoria = this.value;
+    const selectProduto = document.getElementById('selectProduto');
+    const selectTamanho = document.getElementById('selectTamanho');
+    
+    console.log('🎯 Categoria selecionada:', categoria);
+    console.log('📦 Produtos para essa categoria:', produtosPorCategoria[categoria]);
+    
+    // Limpar seleções anteriores
+    selectProduto.innerHTML = '<option value="">Selecione o produto</option>';
+    selectTamanho.innerHTML = '<option value="">Selecione o tamanho</option>';
+    
+    if (categoria && produtosPorCategoria[categoria]) {
+        console.log('✅ Encontrou produtos! Total:', produtosPorCategoria[categoria].length);
+        produtosPorCategoria[categoria].forEach(produto => {
+            const option = document.createElement('option');
+            option.value = produto.id;
+            option.textContent = `${produto.nome} - R$ ${produto.preco.toFixed(2)}`;
+            selectProduto.appendChild(option);
+        });
+        console.log('✅ Produtos adicionados ao select!');
+    } else {
+        console.log('⚠️ Nenhum produto encontrado para essa categoria');
+    }
+});
+
+// Quando seleciona produto, atualiza lista de tamanhos
+document.getElementById('selectProduto').addEventListener('change', function() {
+    const produtoId = this.value;
+    const selectTamanho = document.getElementById('selectTamanho');
+    
+    selectTamanho.innerHTML = '<option value="">Selecione o tamanho</option>';
+    
+    if (produtoId && produtosDados[produtoId]) {
+        const produto = produtosDados[produtoId];
+        
+        // Adicionar opções de tamanho conforme estoque
+        const tamanhos = [
+            {cod: 'pp', nome: 'PP - Extra Pequeno', estoque: produto.estoque_pp},
+            {cod: 'p', nome: 'P - Pequeno', estoque: produto.estoque_p},
+            {cod: 'm', nome: 'M - Médio', estoque: produto.estoque_m},
+            {cod: 'g', nome: 'G - Grande', estoque: produto.estoque_g},
+            {cod: 'gg', nome: 'GG - Extra Grande', estoque: produto.estoque_gg},
+            {cod: 'unico', nome: 'Único', estoque: 999}
+        ];
+        
+        tamanhos.forEach(tamanho => {
+            if (tamanho.estoque > 0 || tamanho.cod === 'unico') {
+                const option = document.createElement('option');
+                option.value = tamanho.cod;
+                option.textContent = tamanho.nome;
+                selectTamanho.appendChild(option);
+            }
+        });
+    }
+});
+
+// Botão Adicionar ao Pedido - garantir que o evento seja anexado quando DOM estiver pronto
+function inicializarBotoesAdicionar() {
+    const btnAdicionar = document.getElementById('btnAdicionar');
+    if (btnAdicionar) {
+        // Remover event listeners antigos se existirem
+        btnAdicionar.replaceWith(btnAdicionar.cloneNode(true));
+        const novoBtn = document.getElementById('btnAdicionar');
+        
+        novoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const categoria = document.getElementById('selectCategoria').value;
+            const produtoId = document.getElementById('selectProduto').value;
+            const tamanho = document.getElementById('selectTamanho').value;
+            
+            console.log('🎯 Botão Adicionar clicado:', { categoria, produtoId, tamanho });
+            
+            if (!categoria || !produtoId || !tamanho) {
+                mostrarMensagem('⚠️ Selecione categoria, produto e tamanho!', 'error');
+                return;
+            }
+            
+            const produto = produtosDados[produtoId] || produtosDados[produtoId.toString()];
+            
+            if (!produto) {
+                console.error('❌ Produto não encontrado:', produtoId);
+                mostrarMensagem('⚠️ Erro: Produto não encontrado!', 'error');
+                return;
+            }
+            
+            // Verificar estoque do tamanho selecionado
+            const estoqueMap = {
+                'pp': produto.estoque_pp,
+                'p': produto.estoque_p,
+                'm': produto.estoque_m,
+                'g': produto.estoque_g,
+                'gg': produto.estoque_gg,
+                'unico': 999
+            };
+            
+            if (tamanho !== 'unico' && estoqueMap[tamanho] <= 0) {
+                mostrarMensagem('⚠️ Estoque insuficiente para este tamanho!', 'error');
+                return;
+            }
+            
+            // Adicionar ao carrinho
+            carrinho.push({
+                produto_id: produtoId.toString(),
+                produto_nome: produto.nome,
+                categoria: categoria,
+                tamanho: tamanho,
+                preco: produto.preco,
+                quantidade: 1
+            });
+        
+            atualizarCarrinho();
+            atualizarValorTotal();
+            mostrarMensagem('✅ Produto adicionado ao pedido!', 'success');
+            
+            // Limpar seleções
+            document.getElementById('selectTamanho').value = '';
+            document.getElementById('selectProduto').value = '';
+            document.getElementById('selectCategoria').value = '';
+        });
+        
+        console.log('✅ Botão Adicionar inicializado com sucesso!');
+    } else {
+        console.warn('⚠️ Botão btnAdicionar não encontrado!');
+    }
+}
+
+// Nota: A função mostrarMensagem já está definida no início do script (linha 606)
+
+function atualizarCarrinho() {
+    const carrinhoDiv = document.getElementById('carrinhoVenda');
+    
+    if (carrinho.length === 0) {
+        carrinhoDiv.innerHTML = '<p style="color: #ffd700; text-align: center; padding: 20px; background: rgba(0, 102, 204, 0.1); border-radius: 10px; border: 2px dashed #0066cc;"><i class="fas fa-shopping-cart me-2"></i>Nenhum item adicionado</p>';
+        return;
+    }
+    
+    let html = '<table class="table table-sm">';
+    html += '<thead><tr><th>Produto</th><th>Tamanho</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody>';
+    
+    carrinho.forEach((item, index) => {
+        const tamanhoLabel = item.tamanho === 'unico' ? 'Único' : item.tamanho.toUpperCase();
+        html += `
+            <tr>
+                <td>
+                    <strong>${item.produto_nome}</strong>
+                    <br><small class="text-muted">${item.categoria}</small>
+                </td>
+                <td>
+                    <span class="badge bg-info">${tamanhoLabel}</span>
+                </td>
+                <td>
+                    <input type="number" value="${item.quantidade}" min="1" 
+                           onchange="atualizarQuantidade(${index}, this.value)"
+                           style="width: 70px; background: #1a1a1a; color: #ffd700; border: 2px solid #0066cc; border-radius: 8px; padding: 5px; text-align: center; font-weight: 600;">
+                </td>
+                <td><span class="badge bg-secondary">R$ ${item.preco.toFixed(2)}</span></td>
+                <td><strong class="text-success">R$ ${(item.preco * item.quantidade).toFixed(2)}</strong></td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="removerItem(${index})" style="box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    carrinhoDiv.innerHTML = html;
+}
+
+function atualizarQuantidade(index, quantidade) {
+    carrinho[index].quantidade = parseInt(quantidade);
+    atualizarCarrinho();
+    atualizarValorTotal();
+}
+
+function removerItem(index) {
+    carrinho.splice(index, 1);
+    atualizarCarrinho();
+    atualizarValorTotal();
+}
+
+function calcularValores() {
+    atualizarValorTotal();
+}
+
+function atualizarValorTotal() {
+    const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+    const desconto = parseFloat(document.getElementById('valor_desconto').value) || 0;
+    const totalComDesconto = Math.max(0, total - desconto);
+    
+    document.getElementById('valor_total').value = totalComDesconto.toFixed(2);
+    calcularTroco();
+    
+    // Atualizar itens JSON hidden field
+    document.getElementById('itens_json').value = JSON.stringify(carrinho);
+}
+
+function calcularTroco() {
+    const total = parseFloat(document.getElementById('valor_total').value) || 0;
+    const pago = parseFloat(document.getElementById('valor_pago').value) || 0;
+    const troco = pago - total;
+    
+    document.getElementById('troco').value = troco >= 0 ? troco.toFixed(2) : '0.00';
+}
+
+function limparCarrinho() {
+    if (confirm('Deseja realmente limpar o pedido?')) {
+        carrinho = [];
+        atualizarCarrinho();
+        document.getElementById('formVenda').reset();
+    }
+}
+
+// Registrar venda via AJAX
+function inicializarBotaoConfirmarVenda() {
+    const btnConfirmar = document.getElementById('btnConfirmarVenda');
+    if (btnConfirmar) {
+        // Remover event listeners antigos se existirem
+        btnConfirmar.replaceWith(btnConfirmar.cloneNode(true));
+        const novoBtn = document.getElementById('btnConfirmarVenda');
+        
+        novoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (carrinho.length === 0) {
+                mostrarMensagem('⚠️ Adicione pelo menos um produto ao pedido!', 'error');
+                return;
+            }
+            
+            const form = document.getElementById('formVenda');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Desabilitar botão
+            const btnOriginal = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirmando...';
+            
+            // Preparar dados para envio
+            document.getElementById('itens_json').value = JSON.stringify(carrinho);
+            const formData = new FormData(form);
+            
+            fetch('{% url "servicos:venda_vestuario" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('📡 Resposta da venda:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Dados da venda:', data);
+                if (data.success) {
+                    mostrarMensagem('✅ Venda registrada com sucesso!', 'success');
+                    
+                    // Limpar carrinho e recarregar após 2 segundos
+                    setTimeout(() => {
+                        carrinho = [];
+                        atualizarCarrinho();
+                        form.reset();
+                        document.getElementById('selectCategoria').value = '';
+                        document.getElementById('selectProduto').value = '';
+                        document.getElementById('selectTamanho').value = '';
+                        location.reload();
+                    }, 2000);
+                } else {
+                    mostrarMensagem('❌ Erro: ' + (data.error || 'Erro desconhecido'), 'error');
+                    this.disabled = false;
+                    this.innerHTML = btnOriginal;
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro:', error);
+                mostrarMensagem('❌ Erro ao registrar venda. Verifique o console.', 'error');
+                this.disabled = false;
+                this.innerHTML = btnOriginal;
+            });
+        });
+        
+        console.log('✅ Botão Confirmar Venda inicializado com sucesso!');
+    } else {
+        console.warn('⚠️ Botão btnConfirmarVenda não encontrado!');
+    }
+}
+
+// Inicializar tooltips do Bootstrap e botões quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Inicializando sistema...');
+    
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    console.log('📊 Tooltips encontrados:', tooltipTriggerList.length);
+    
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    console.log('✅ Tooltips inicializados:', tooltipList.length);
+    
+    // Inicializar botões
+    inicializarBotoesAdicionar();
+    inicializarBotaoConfirmarVenda();
+    
+    // Atualizar valores quando campos mudarem (se existirem)
+    const valorPagoEl = document.getElementById('valor_pago');
+    const valorDescontoEl = document.getElementById('valor_desconto');
+
+    if (valorPagoEl) {
+        valorPagoEl.addEventListener('input', calcularTroco);
+        console.log('✅ Campo valor_pago inicializado');
+    }
+
+    if (valorDescontoEl) {
+        valorDescontoEl.addEventListener('input', calcularValores);
+        console.log('✅ Campo valor_desconto inicializado');
+    }
+    
+    // Verificar se a função adicionarAoPedido está disponível
+    if (typeof adicionarAoPedido === 'function') {
+        console.log('✅ Função adicionarAoPedido disponível!');
+    } else {
+        console.error('❌ Função adicionarAoPedido NÃO está disponível!');
+    }
+    
+    // Garantir que os selects estejam inicializados
+    const selectCategoria = document.getElementById('selectCategoria');
+    const selectProduto = document.getElementById('selectProduto');
+    const selectTamanho = document.getElementById('selectTamanho');
+    
+    if (selectCategoria) {
+        console.log('✅ Select Categoria encontrado');
+    } else {
+        console.warn('⚠️ Select Categoria não encontrado!');
+    }
+    
+    if (selectProduto) {
+        console.log('✅ Select Produto encontrado');
+    } else {
+        console.warn('⚠️ Select Produto não encontrado!');
+    }
+    
+    if (selectTamanho) {
+        console.log('✅ Select Tamanho encontrado');
+    } else {
+        console.warn('⚠️ Select Tamanho não encontrado!');
+    }
+    
+    console.log('✅ Sistema inicializado completamente!');
+});
+</script>
+{% endblock %}
+

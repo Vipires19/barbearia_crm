@@ -1,0 +1,152 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block title %}Produtos de Roupa{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tshirt me-2"></i>Produtos de Roupa</h2>
+    <div class="btn-group">
+        <a href="{% url 'servicos:categorias_lista' %}" class="btn btn-info">
+            <i class="fas fa-tags me-1"></i>Categorias
+        </a>
+        <a href="{% url 'servicos:produto_novo' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Novo Produto
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="busca" class="form-control" 
+                       placeholder="Buscar produto..." value="{{ busca }}">
+            </div>
+            <div class="col-md-3">
+                <select name="categoria" class="form-control">
+                    <option value="">Todas as categorias</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id }}" {% if categoria_selecionada == cat.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cat.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="estoque_baixo" id="estoque_baixo" 
+                           {% if estoque_baixo %}checked{% endif %}>
+                    <label class="form-check-label" for="estoque_baixo">
+                        Estoque baixo
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Produtos -->
+<div class="row">
+    {% for produto in produtos %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 {% if produto.estoque_baixo %}border-warning{% endif %}">
+            {% if produto.imagem %}
+            <img src="/media/{{ produto.imagem }}" class="card-img-top" alt="{{ produto.nome }}" 
+                 style="height: 250px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                 style="height: 250px;">
+                <i class="fas fa-tshirt fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title">{{ produto.nome }}</h5>
+                    {% if produto.estoque_baixo %}
+                    <span class="badge bg-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Estoque baixo
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <p class="small mb-2">
+                    <span class="badge bg-secondary">{{ produto.categoria.nome }}</span>
+                    {% if produto.marca %}
+                    <span class="badge bg-info">{{ produto.marca }}</span>
+                    {% endif %}
+                </p>
+                
+                <div class="mb-2">
+                    <strong style="color: #0066cc;">R$ {{ produto.preco|floatformat:2 }}</strong>
+                    {% if produto.preco_custo %}
+                    <small style="color: #ccc;"> | Custo: R$ {{ produto.preco_custo|floatformat:2 }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-2">
+                    <small style="color: #ccc;">
+                        <strong>Estoque:</strong> PP({{ produto.estoque_pp }}) P({{ produto.estoque_p }}) 
+                        M({{ produto.estoque_m }}) G({{ produto.estoque_g }}) GG({{ produto.estoque_gg }})
+                    </small>
+                </div>
+                
+                <div class="btn-group w-100">
+                    <a href="{% url 'servicos:produto_editar' pk=produto.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{% url 'servicos:produto_deletar' pk=produto.id %}" 
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Deseja realmente deletar este produto?')">
+                        <i class="fas fa-trash"></i> Deletar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Nenhum produto encontrado.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginação -->
+{% if produtos.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if produtos.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Primeira</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ produtos.previous_page_number }}">Anterior</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ produtos.number }} de {{ produtos.paginator.num_pages }}</span>
+        </li>
+        
+        {% if produtos.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ produtos.next_page_number }}">Próxima</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ produtos.paginator.num_pages }}">Última</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+

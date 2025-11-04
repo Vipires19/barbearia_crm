@@ -1,0 +1,82 @@
+{% extends 'servicos/admin/base_admin.html' %}
+
+{% block content %}
+<h2><i class="fas fa-boxes me-2"></i>Controle de Estoque</h2>
+
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Total de Produtos</h5>
+                <h2>{{ total_produtos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5>Produtos Estoque Baixo</h5>
+                <h2>{{ estoque_baixo|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Valor Total Estoque</h5>
+                <h2>R$ {{ valor_total_estoque|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Estoque -->
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Estoque Total</th>
+                    <th>Estoque Mínimo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr class="{% if produto.estoque_baixo %}table-warning{% endif %}">
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.categoria.nome }}</td>
+                    <td>{{ produto.estoque_total }}</td>
+                    <td>{{ produto.estoque_minimo }}</td>
+                    <td>
+                        {% if produto.estoque_baixo %}
+                        <span class="badge bg-warning">Estoque Baixo</span>
+                        {% else %}
+                        <span class="badge bg-success">OK</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'servicos:produto_editar' pk=produto.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">Nenhum produto cadastrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
